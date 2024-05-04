@@ -1,5 +1,5 @@
-function HighScore({ score }) {
-  return <div className="high-score">Score: {score}</div>;
+function Score({ score }) {
+  return <div className="score">Score: {score}</div>;
 }
 
-export default HighScore;
+export default Score;

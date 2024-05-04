@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Card from './components/Card';
 import { v4 as uuidv4 } from 'uuid';
 import Score from './components/Score';
+import HighScore from './components/HighScore';
 
 function App() {
   const [cards, setCards] = useState([
@@ -38,10 +39,15 @@ function App() {
     },
   ]);
 
+  const [highScore, setHighScore] = useState(0);
+
   const [score, setScore] = useState(0);
 
   useEffect(() => {
     const newScore = cards.filter((card) => card.clicked).length;
+    if (newScore > highScore) {
+      setHighScore(newScore);
+    }
     setScore(newScore);
   }, [cards]);
 
@@ -51,7 +57,7 @@ function App() {
       cards.map((card) => ({
         ...card,
         clicked: false,
-      })) 
+      }))
     );
   }
 
@@ -71,8 +77,8 @@ function App() {
   }, []);
 
   function handleCardClick(cardData) {
-    setCards(prevCards => {
-      const newCards = prevCards.map(card => {
+    setCards((prevCards) => {
+      const newCards = prevCards.map((card) => {
         if (card.id === cardData.id) {
           if (card.clicked) {
             resetGame();
@@ -90,6 +96,7 @@ function App() {
     <>
       <h1>Memory Card</h1>
       <h2>Don&apos;t click the same card more than once!</h2>
+      <HighScore highScore={highScore} />
       <Score score={score} />
       <div className="card-container">
         {cards.map((card) => (
