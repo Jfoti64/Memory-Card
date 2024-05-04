@@ -34,7 +34,13 @@
 }
 
 .card {
-  padding: 2em;
+  padding: .5em;
+  margin: 10px;
+}
+
+.card img {
+  width: 185px;
+  height: auto;
 }
 
 .read-the-docs {
