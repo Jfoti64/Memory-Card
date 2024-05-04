@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Card from './components/Card';
 import { v4 as uuidv4 } from 'uuid';
+import Score from './components/Score';
 
 function App() {
   const [cards, setCards] = useState([
@@ -8,32 +9,53 @@ function App() {
       id: uuidv4(),
       imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
       text: '01',
+      clicked: false,
     },
     {
       id: uuidv4(),
       imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      clicked: false,
     },
     {
       id: uuidv4(),
       imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      clicked: false,
     },
     {
       id: uuidv4(),
       imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      clicked: false,
     },
     {
       id: uuidv4(),
       imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      clicked: false,
     },
     {
       id: uuidv4(),
       imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      clicked: false,
     },
   ]);
 
-  const [shuffledCards, setShuffledCards] = useState([]);
+  const [score, setScore] = useState(0);
 
-  // Function to shuffle array
+  useEffect(() => {
+    const newScore = cards.filter((card) => card.clicked).length;
+    setScore(newScore);
+  }, [cards]);
+
+  function resetGame() {
+    // Reset clicked property for each card
+    setCards(
+      cards.map((card) => ({
+        ...card,
+        clicked: false,
+      })) 
+    );
+  }
+
+  // Shuffle the array
   const shuffleArray = (array) => {
     const shuffledArray = array.slice();
     for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -45,31 +67,33 @@ function App() {
 
   // Shuffle items once on component mount
   useEffect(() => {
-    setShuffledCards(shuffleArray(cards));
-  }, [cards]);
+    setCards(shuffleArray([...cards]));
+  }, []);
 
   function handleCardClick(cardData) {
-    setShuffledCards(shuffleArray(cards));
-    return (
-      <>
-        <h1>Memory Card</h1>
-        <h2>Don&apos;t click the same card more than once!</h2>
-        <div className="card-container">
-          {shuffledCards.map((card) => (
-            <Card key={card.id} handleClick={handleCardClick} data={card} />
-          ))}
-        </div>
-      </>
-    );
+    setCards(prevCards => {
+      const newCards = prevCards.map(card => {
+        if (card.id === cardData.id) {
+          if (card.clicked) {
+            resetGame();
+            return { ...card, clicked: false };
+          }
+          return { ...card, clicked: true };
+        }
+        return card;
+      });
+      return shuffleArray(newCards);
+    });
   }
 
   return (
     <>
       <h1>Memory Card</h1>
       <h2>Don&apos;t click the same card more than once!</h2>
+      <Score score={score} />
       <div className="card-container">
-        {shuffledCards.map((card) => (
-          <Card key={card.id} handleClick={handleCardClick} data={card} />
+        {cards.map((card) => (
+          <Card key={card.id} handleClick={() => handleCardClick(card)} data={card} />
         ))}
       </div>
     </>
