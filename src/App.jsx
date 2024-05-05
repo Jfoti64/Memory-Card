@@ -8,33 +8,33 @@ function App() {
   const [cards, setCards] = useState([
     {
       id: uuidv4(),
-      imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
-      text: '01',
+      imgSrc: '',
+      text: '',
       clicked: false,
     },
     {
       id: uuidv4(),
-      imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      imgSrc: '',
       clicked: false,
     },
     {
       id: uuidv4(),
-      imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      imgSrc: '',
       clicked: false,
     },
     {
       id: uuidv4(),
-      imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      imgSrc: '',
       clicked: false,
     },
     {
       id: uuidv4(),
-      imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      imgSrc: '',
       clicked: false,
     },
     {
       id: uuidv4(),
-      imgSrc: './src/assets/ruby-murphy-5Gz-yFc0mfQ-unsplash.jpg',
+      imgSrc: '',
       clicked: false,
     },
   ]);
@@ -45,21 +45,11 @@ function App() {
 
   useEffect(() => {
     const newScore = cards.filter((card) => card.clicked).length;
+    setScore(newScore);
     if (newScore > highScore) {
       setHighScore(newScore);
     }
-    setScore(newScore);
   }, [cards]);
-
-  function resetGame() {
-    // Reset clicked property for each card
-    setCards(
-      cards.map((card) => ({
-        ...card,
-        clicked: false,
-      }))
-    );
-  }
 
   // Shuffle the array
   const shuffleArray = (array) => {
@@ -71,24 +61,54 @@ function App() {
     return shuffledArray;
   };
 
-  // Shuffle items once on component mount
   useEffect(() => {
-    setCards(shuffleArray([...cards]));
+    const usedIds = [];
+    const fetchImages = async () => {
+      const updatedCards = await Promise.all(
+        cards.map(async (card) => {
+          try {
+            let randomPokemonId;
+            do {
+              randomPokemonId = Math.floor(Math.random() * 151) + 1;
+            } while (usedIds.includes(randomPokemonId));
+
+            usedIds.push(randomPokemonId);
+
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomPokemonId}`);
+            const json = await response.json();
+            const src = json.sprites.front_default;
+            const pokemonName = json.name;
+            return { ...card, imgSrc: src, text: pokemonName };
+          } catch (error) {
+            console.error('Error fetching data for card:', card.id, error);
+            return card; // Return card unchanged in case of error
+          }
+        })
+      );
+
+      setCards(shuffleArray(updatedCards)); // Shuffle after all fetches complete
+    };
+
+    fetchImages();
   }, []);
 
   function handleCardClick(cardData) {
     setCards((prevCards) => {
+      let reset = false;
       const newCards = prevCards.map((card) => {
         if (card.id === cardData.id) {
           if (card.clicked) {
-            resetGame();
+            reset = true;
             return { ...card, clicked: false };
           }
           return { ...card, clicked: true };
         }
         return card;
       });
-      return shuffleArray(newCards);
+
+      return reset
+        ? shuffleArray(newCards.map((card) => ({ ...card, clicked: false })))
+        : shuffleArray(newCards);
     });
   }
 

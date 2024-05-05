@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 function Card({ handleClick, data }) {
   return (
     <button className="card" onClick={() => handleClick(data)}>
